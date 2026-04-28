@@ -20,7 +20,7 @@ if (!cached.mongoose) {
 export async function connectDB() {
     if (cached.mongoose?.conn) return cached.mongoose.conn;
 
-    if (!cached.mongoose?.promise) {
+    if (!cached.mongoose?.promise && MONGODB_URI) {
         cached.mongoose!.promise = mongoose.connect(MONGODB_URI);
     }
 
