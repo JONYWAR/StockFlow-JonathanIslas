@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@models/*": ["./src/lib/models/*"],
+      "@db": ["./src/lib/db.ts"]
     }
   },
   "include": [
