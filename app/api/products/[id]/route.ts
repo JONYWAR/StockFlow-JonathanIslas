@@ -4,10 +4,11 @@ import { Product } from "@models/Product";
 import { ProductValidation } from "@validations/Product";
 import { ZodError } from "zod";
 
-// GET -> read all products
+// GET function to get a product by ID
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
 
     try {
+        // connection to database
         await connectDB();
 
         const {id} = await params;
@@ -19,7 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             );
 
         }
-
+        // Using Mongoose to find a product by ID and return it or error message if not found
         const product = await Product.findById(id);
         if (!product) {
             return NextResponse.json(
@@ -40,9 +41,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 }
 
-// PUT -> update product
+// PUT -> update product by ID
 export async function PUT(request: Request, { params } :{ params : Promise<{ id: string }> }) {
     try {
+        // same as GET, we first connect to the database, then find the product by ID
         await connectDB();
 
         const { id } = await params;
@@ -55,9 +57,10 @@ export async function PUT(request: Request, { params } :{ params : Promise<{ id:
             );
         }
 
-        // Validate update data with Zod
+        // Validate update data with Zod for easy error handling
         const validatedData = ProductValidation.parse(updatedData);
 
+        // Update the product with the validated data and error handling
         const product = await Product.findByIdAndUpdate(id, validatedData, {
             new: true,
             runValidators: true,
@@ -76,13 +79,8 @@ export async function PUT(request: Request, { params } :{ params : Promise<{ id:
         });
 
     } catch (error: any) {
-        if (error.code === 11000) {
-            return NextResponse.json(
-                { success: false, error: "Duplicate SKU" },
-                { status: 400 }
-            );
-        }
 
+        // in case of ZodError, return the validation errors
         if (error instanceof ZodError) {
             return NextResponse.json(
                 { success: false, error: error.issues.map((err: any) => err.message)},
@@ -97,9 +95,10 @@ export async function PUT(request: Request, { params } :{ params : Promise<{ id:
     }
 }
 
-// DELETE -> delete product
+// DELETE -> delete product by ID
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
+        // Connection to database and find product by ID to delete it, if not found return error message
         await connectDB();
 
         const {id} = await params;
