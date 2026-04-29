@@ -1,11 +1,29 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@db";
 import { Product } from "@models/Product";
+import { ProductValidation } from "@validations/Product";
 
-// GET -> read products
-export async function GET() {
+// GET -> read all products
+export async function GET(request: NextRequest) {
     try {
         await connectDB();
+
+        const searchParams = request.nextUrl.searchParams;
+        const id = searchParams.get("id");
+
+        if (id) {
+            const product = await Product.findById(id);
+            if (!product) {
+                return NextResponse.json(
+                    { success: false, error: "Product not found" },
+                    { status: 404 }
+                );
+            }
+            return NextResponse.json({
+                success: true,
+                data: product,
+            });
+        }
 
         const products = await Product.find().sort({ createdAt: -1 });
 
@@ -21,26 +39,32 @@ export async function GET() {
     }
 }
 
-// POST -> create test product
-export async function POST() {
+// POST -> create product
+export async function POST(request: NextRequest) {
     try {
         await connectDB();
-
-        const product = await Product.create({
-            sku: "TEST-" + Date.now(),
-            name: "Test Product",
-            price: 100,
-            category: "Test",
-        });
-
-        return NextResponse.json({
-            success: true,
-            data: product,
-        });
+        const body = await request.json();
+        // Validate request body with Zod
+        const validatedData = ProductValidation.parse(body);
+        const product = await Product.create(validatedData);
+        return NextResponse.json(
+            {
+                success: true,
+                data: product,
+            },
+            { status: 201 }
+        );
     } catch (error: any) {
         if (error.code === 11000) {
             return NextResponse.json(
                 { success: false, error: "Duplicate SKU" },
+                { status: 400 }
+            );
+        }
+
+        if (error.name === "ZodError") {
+            return NextResponse.json(
+                { success: false, error: "Validation error", details: error.errors },
                 { status: 400 }
             );
         }

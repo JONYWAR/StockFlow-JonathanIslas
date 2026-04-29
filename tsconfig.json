@@ -21,7 +21,8 @@
     "paths": {
       "@/*": ["./*"],
       "@models/*": ["./src/lib/models/*"],
-      "@db": ["./src/lib/db.ts"]
+      "@validations/*": ["./src/lib/validations/*"],
+      "@db": ["./src/lib/db.ts"],
     }
   },
   "include": [
