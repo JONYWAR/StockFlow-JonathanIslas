@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@db";
 import { Product } from "@models/Product";
 import { ProductValidation } from "@validations/Product";
+import {ZodError} from "zod";
 
 // GET -> read all products
 export async function GET(request: NextRequest) {
@@ -62,9 +63,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (error.name === "ZodError") {
+        // in case of ZodError, return the validation errors
+        if (error instanceof ZodError) {
             return NextResponse.json(
-                { success: false, error: "Validation error", details: error.errors },
+                { success: false, error: error.issues.map((err: any) => err.message)},
                 { status: 400 }
             );
         }
