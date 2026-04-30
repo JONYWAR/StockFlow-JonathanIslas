@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@db";
 import { Movement } from "@models/Movement";
 import { MovementValidation } from "@validations/Movement";
+import { processMovement } from "@/src/lib/worker";
 
 // GET -> read all movements
 export async function GET(request: Request) {
@@ -78,10 +79,23 @@ export async function POST(request: Request) {
             status: "pending",
         });
 
+        // Fetch created movement with populated fields
+        const createdMovement = await Movement.findById(movement._id)
+            .populate("productId")
+            .populate("originBranch")
+            .populate("destinationBranch");
+
+        // Process movement asynchronously (non-blocking)
+        // This allows the API to return immediately while processing happens in background
+        processMovement(movement._id.toString()).catch((error) => {
+            console.error("Background worker error:", error);
+        });
+
         return NextResponse.json(
             {
                 success: true,
-                data: "Movement created successfully",
+                data: createdMovement,
+                message: "Movement created and queued for processing",
             },
             { status: 201 }
         );

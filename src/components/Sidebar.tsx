@@ -107,7 +107,15 @@ export function Sidebar({open = true, onClose}: SidebarProps) {
 
                     return (
                         <Link href={item.path} key={item.path} style={{textDecoration: 'none'}}>
-                            <StyledListItem active={isActive} sx={{cursor: 'pointer'}}>
+                            <StyledListItem 
+                                active={isActive} 
+                                sx={{cursor: 'pointer'}}
+                                onClick={() => {
+                                    if (isMobile && onClose) {
+                                        onClose();
+                                    }
+                                }}
+                            >
                                 <ListItemIcon>
                                     <Icon fontSize="small"/>
                                 </ListItemIcon>

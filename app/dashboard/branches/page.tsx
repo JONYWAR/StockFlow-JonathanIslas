@@ -279,11 +279,8 @@ export default function BranchesPage() {
         fields={BRANCH_FIELDS}
         submitButtonText={editingId ? 'Update' : 'Create'}
         error={submitError}
-      >
-        {editData && (
-          <input type="hidden" name="name" value={editData.name} />
-        )}
-      </FormModal>
+        initialData={editData || undefined}
+      />
     </Box>
   );
 }

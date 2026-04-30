@@ -83,6 +83,12 @@ Aplicando la restricción de **48 horas**, decidí priorizar según el valor fun
 
 ---
 
+## **Known Issues:**
+- Major > Al eliminar un producto o branch, provoca interrupción de servicio
+al intentar leer los Movimientos, ya que hace uso de los IDs los cuales ya no existen.
+
+---
+
 ## 📝 Notas Finales
 
 - El `README.md` ya incluye instrucciones de setup y justificación de decisiones

@@ -32,6 +32,7 @@ import {
   SwapHoriz as TransferIcon,
 } from '@mui/icons-material';
 import { FormModal } from '@/src/components/FormModal';
+import MovementDetailsModal from '@/src/components/MovementDetailsModal';
 import styled from '@emotion/styled';
 
 const HeaderBox = styled(Box)`
@@ -66,6 +67,7 @@ interface Movement {
   originBranch: { _id: string; name: string };
   destinationBranch?: { _id: string; name: string };
   reason?: string;
+  failureReason?: string;
   createdAt: string;
 }
 
@@ -91,24 +93,6 @@ const movementIcons: Record<'entry' | 'out' | 'transfer', React.ReactNode> = {
   transfer: <TransferIcon fontSize="small" sx={{ mr: 0.5 }} />,
 };
 
-const MOVEMENT_FIELDS = [
-  {
-    name: 'movementType',
-    label: 'Movement Type',
-    type: 'select',
-    options: [
-      { value: 'entry', label: 'Stock Entry' },
-      { value: 'out', label: 'Stock Out' },
-      { value: 'transfer', label: 'Transfer' },
-    ],
-    required: true,
-  },
-  { name: 'productId', label: 'Product ID', required: true },
-  { name: 'quantity', label: 'Quantity', type: 'number', required: true },
-  { name: 'originBranch', label: 'Origin Branch', required: true },
-  { name: 'destinationBranch', label: 'Destination Branch' },
-  { name: 'reason', label: 'Reason' },
-];
 
 export default function MovementsPage() {
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -120,6 +104,44 @@ export default function MovementsPage() {
   const [branchFilter, setBranchFilter] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+
+  const dynamicMovementFields = [
+    {
+      name: 'movementType',
+      label: 'Movement Type',
+      type: 'select',
+      options: [
+        { value: 'entry', label: 'Stock Entry' },
+        { value: 'out', label: 'Stock Out' },
+        { value: 'transfer', label: 'Transfer' },
+      ],
+      required: true,
+    },
+    {
+      name: 'productId',
+      label: 'Product',
+      type: 'select',
+      options: products.map((p) => ({ value: p._id, label: p.name })),
+      required: true,
+    },
+    { name: 'quantity', label: 'Quantity', type: 'number', required: true },
+    {
+      name: 'originBranch',
+      label: 'Origin Branch',
+      type: 'select',
+      options: branches.map((b) => ({ value: b._id, label: b.name })),
+      required: true,
+    },
+    {
+      name: 'destinationBranch',
+      label: 'Destination Branch',
+      type: 'select',
+      options: branches.map((b) => ({ value: b._id, label: b.name })),
+    },
+    { name: 'reason', label: 'Reason' },
+  ];
 
   // Fetch data
   const fetchData = async () => {
@@ -200,6 +222,11 @@ export default function MovementsPage() {
     const branchMatch = !branchFilter || mov.originBranch._id === branchFilter;
     return statusMatch && branchMatch;
   });
+
+  const handleRowClick = (movement: Movement) => {
+    setSelectedMovement(movement);
+    setDetailsModalOpen(true);
+  };
 
   return (
     <Box>
@@ -291,8 +318,9 @@ export default function MovementsPage() {
                 filteredMovements.map((movement) => (
                   <TableRow
                     key={movement._id}
+                    onClick={() => handleRowClick(movement)}
                     sx={{
-                      '&:hover': { backgroundColor: '#F9FAFB' },
+                      '&:hover': { backgroundColor: '#F9FAFB', cursor: 'pointer' },
                       transition: 'background-color 0.2s',
                     }}
                   >
@@ -327,7 +355,10 @@ export default function MovementsPage() {
                       <Tooltip title="Delete">
                         <IconButton
                           size="small"
-                          onClick={() => handleDelete(movement._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(movement._id);
+                          }}
                           sx={{ color: '#EF4444' }}
                         >
                           <DeleteIcon fontSize="small" />
@@ -350,9 +381,18 @@ export default function MovementsPage() {
         }}
         onSubmit={handleSubmit}
         title="Create Movement"
-        fields={MOVEMENT_FIELDS}
+        fields={dynamicMovementFields}
         submitButtonText="Create"
         error={submitError}
+      />
+
+      <MovementDetailsModal
+        open={detailsModalOpen}
+        onClose={() => {
+          setDetailsModalOpen(false);
+          setSelectedMovement(null);
+        }}
+        movement={selectedMovement}
       />
     </Box>
   );

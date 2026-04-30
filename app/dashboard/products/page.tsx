@@ -61,7 +61,7 @@ const PRODUCT_FIELDS = [
   { name: 'sku', label: 'SKU', required: true },
   { name: 'name', label: 'Product Name', required: true },
   { name: 'price', label: 'Price', type: 'number', required: true },
-  { name: 'category', label: 'Category', required: true },
+  { name: 'category', label: 'Category', type: 'select', options: [], required: true },
 ];
 
 export default function ProductsPage() {
@@ -98,6 +98,7 @@ export default function ProductsPage() {
 
   // Create/Update product
   const handleSubmit = async (formData: any) => {
+
     try {
       setSubmitError('');
       const method = editingId ? 'PUT' : 'POST';
@@ -150,6 +151,22 @@ export default function ProductsPage() {
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Get unique categories from existing products
+  const categories = Array.from(new Set(products.map((p) => p.category)))
+    .filter(Boolean)
+    .sort();
+
+  const dynamicFields = PRODUCT_FIELDS.map((field) => {
+    if (field.name === 'category') {
+      return {
+        ...field,
+        type: 'autocomplete',
+        options: categories.map((cat) => ({ value: cat, label: cat })),
+      };
+    }
+    return field;
+  });
 
   return (
     <Box>
@@ -269,9 +286,10 @@ export default function ProductsPage() {
         }}
         onSubmit={handleSubmit}
         title={editingId ? 'Edit Product' : 'Create Product'}
-        fields={PRODUCT_FIELDS}
+        fields={dynamicFields}
         submitButtonText={editingId ? 'Update' : 'Create'}
         error={submitError}
+        initialData={products.find((p) => p._id === editingId)}
       />
     </Box>
   );
