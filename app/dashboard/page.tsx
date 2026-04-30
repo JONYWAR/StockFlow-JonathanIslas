@@ -57,19 +57,19 @@ interface Product {
 
 interface Stock {
   _id: string;
-  productId: Product;
-  branchId: { _id: string; name: string };
+  productId: Product | null;
+  branchId: { _id: string; name: string } | null;
   quantity: number;
 }
 
 interface Movement {
   _id: string;
   movementType: 'entry' | 'out' | 'transfer';
-  productId: Product;
+  productId: Product | null;
   quantity: number;
   status: 'pending' | 'processed' | 'failed';
-  originBranch: { _id: string; name: string };
-  destinationBranch?: { _id: string; name: string };
+  originBranch: { _id: string; name: string } | null;
+  destinationBranch?: { _id: string; name: string } | null;
   reason?: string;
   createdAt: string;
 }
@@ -159,19 +159,19 @@ export default function DashboardPage() {
   // Calculate total stock per product
   const getProductTotalStock = (productId: string) => {
     return stocks
-      .filter((stock) => stock.productId._id === productId)
+      .filter((stock) => stock.productId?._id === productId)
       .reduce((total, stock) => total + stock.quantity, 0);
   };
 
   // Get stock by branch for a product
   const getStockByBranch = (productId: string) => {
-    return stocks.filter((stock) => stock.productId._id === productId);
+    return stocks.filter((stock) => stock.productId?._id === productId);
   };
 
   // Filter movements
   const filteredMovements = movements.filter((movement) => {
     const matchStatus = !statusFilter || movement.status === statusFilter;
-    const matchBranch = !branchFilter || movement.originBranch._id === branchFilter;
+    const matchBranch = !branchFilter || movement.originBranch?._id === branchFilter;
     return matchStatus && matchBranch;
   });
 
@@ -269,7 +269,7 @@ export default function DashboardPage() {
                             getStockByBranch(product._id).map((stock) => (
                               <Chip
                                 key={stock._id}
-                                label={`${stock.branchId.name}: ${stock.quantity}`}
+                                label={`${stock.branchId?.name || '[Deleted]'}: ${stock.quantity}`}
                                 size="small"
                                 variant="outlined"
                               />
@@ -383,12 +383,14 @@ export default function DashboardPage() {
                       }}
                     >
                       <TableCell>{getMovementTypeLabel(movement.movementType)}</TableCell>
-                      <TableCell>{movement.productId.name}</TableCell>
+                      <TableCell>{movement.productId?.name || '[Deleted Product]'}</TableCell>
                       <TableCell align="center">{movement.quantity}</TableCell>
-                      <TableCell>{movement.originBranch.name}</TableCell>
+                      <TableCell>{movement.originBranch?.name || '[Deleted Branch]'}</TableCell>
                       <TableCell>
                         {movement.destinationBranch
                           ? movement.destinationBranch.name
+                          : movement.movementType === 'transfer'
+                          ? '[Deleted Branch]'
                           : movement.movementType === 'out'
                           ? 'Customer'
                           : 'Supplier'}

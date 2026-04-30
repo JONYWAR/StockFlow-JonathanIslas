@@ -61,11 +61,11 @@ const FilterBox = styled(Box)`
 interface Movement {
   _id: string;
   movementType: 'entry' | 'out' | 'transfer';
-  productId: { _id: string; name: string };
+  productId: { _id: string; name: string } | null;
   quantity: number;
   status: 'pending' | 'processed' | 'failed';
-  originBranch: { _id: string; name: string };
-  destinationBranch?: { _id: string; name: string };
+  originBranch: { _id: string; name: string } | null;
+  destinationBranch?: { _id: string; name: string } | null;
   reason?: string;
   failureReason?: string;
   createdAt: string;
@@ -219,7 +219,7 @@ export default function MovementsPage() {
   // Filter movements
   const filteredMovements = movements.filter((mov) => {
     const statusMatch = !statusFilter || mov.status === statusFilter;
-    const branchMatch = !branchFilter || mov.originBranch._id === branchFilter;
+    const branchMatch = !branchFilter || mov.originBranch?._id === branchFilter;
     return statusMatch && branchMatch;
   });
 
@@ -332,7 +332,7 @@ export default function MovementsPage() {
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>{movement.productId.name}</TableCell>
+                    <TableCell>{movement.productId?.name || '[Deleted Product]'}</TableCell>
                     <TableCell align="center">
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {movement.quantity}

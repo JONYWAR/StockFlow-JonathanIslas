@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@db";
 import { Product } from "@models/Product";
+import { Movement } from "@models/Movement";
+import { Stock } from "@models/Stock";
 import { ProductValidation } from "@validations/Product";
 import { ZodError } from "zod";
 
@@ -106,6 +108,30 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         if (!id) {
             return NextResponse.json(
                 { success: false, error: "Product ID is required" },
+                { status: 400 }
+            );
+        }
+
+        // Check if there are any movements associated with this product
+        const movementCount = await Movement.countDocuments({ productId: id });
+        if (movementCount > 0) {
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    error: "Cannot delete product because it has associated movements. This is required for historical records." 
+                },
+                { status: 400 }
+            );
+        }
+
+        // Check if there is any stock for this product
+        const stocks = await Stock.find({ productId: id, quantity: { $gt: 0 } });
+        if (stocks.length > 0) {
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    error: "Cannot delete product with existing stock in branches." 
+                },
                 { status: 400 }
             );
         }

@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { connectDB } from "@db";
 import { Branch } from "@models/Branch";
+import { Movement } from "@models/Movement";
+import { Stock } from "@models/Stock";
 import { BranchValidation } from "@validations/Branch";
 import { ZodError } from "zod";
 
@@ -113,6 +115,32 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         if (!id) {
             return NextResponse.json(
                 { success: false, error: "Branch ID is required" },
+                { status: 400 }
+            );
+        }
+
+        // Check if there are any movements associated with this branch
+        const movementCount = await Movement.countDocuments({
+            $or: [{ originBranch: id }, { destinationBranch: id }],
+        });
+        if (movementCount > 0) {
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    error: "Cannot delete branch because it has associated movements. This is required for historical records." 
+                },
+                { status: 400 }
+            );
+        }
+
+        // Check if there is any stock in this branch
+        const stocks = await Stock.find({ branchId: id, quantity: { $gt: 0 } });
+        if (stocks.length > 0) {
+            return NextResponse.json(
+                { 
+                    success: false, 
+                    error: "Cannot delete branch because it currently has product stock." 
+                },
                 { status: 400 }
             );
         }

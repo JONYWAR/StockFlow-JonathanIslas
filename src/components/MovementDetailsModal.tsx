@@ -26,11 +26,11 @@ import {
 interface Movement {
   _id: string;
   movementType: 'entry' | 'out' | 'transfer';
-  productId: { _id: string; name: string };
+  productId: { _id: string; name: string } | null;
   quantity: number;
   status: 'pending' | 'processed' | 'failed';
-  originBranch: { _id: string; name: string };
-  destinationBranch?: { _id: string; name: string };
+  originBranch: { _id: string; name: string } | null;
+  destinationBranch?: { _id: string; name: string } | null;
   reason?: string;
   failureReason?: string;
   createdAt: string;
@@ -105,7 +105,9 @@ export default function MovementDetailsModal({
                   <Typography variant="caption" color="text.secondary">
                     Product
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 500 }}>{movement.productId.name}</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {movement.productId?.name || '[Deleted Product]'}
+                  </Typography>
                 </Box>
               </Box>
             </Grid>
@@ -132,7 +134,9 @@ export default function MovementDetailsModal({
                   <Typography variant="caption" color="text.secondary">
                     Origin Branch
                   </Typography>
-                  <Typography variant="body1">{movement.originBranch.name}</Typography>
+                  <Typography variant="body1">
+                    {movement.originBranch?.name || '[Deleted Branch]'}
+                  </Typography>
                 </Box>
               </Box>
             </Grid>

@@ -25,8 +25,8 @@ interface Movement {
   _id: string;
   movementType: 'entry' | 'out' | 'transfer';
   quantity: number;
-  originBranch: { _id: string; name: string };
-  destinationBranch?: { _id: string; name: string };
+  originBranch: { _id: string; name: string } | null;
+  destinationBranch?: { _id: string; name: string } | null;
   createdAt: string;
 }
 
@@ -80,9 +80,11 @@ export default function ReportsPage() {
   const totalsByBranch: Record<string, { name: string; entry: number; out: number; transferIn: number; transferOut: number }> = {};
 
   movements.forEach((mov) => {
-    const originId = mov.originBranch._id;
+    const originId = mov.originBranch?._id || 'deleted';
+    const originName = mov.originBranch?.name || '[Deleted Branch]';
+    
     if (!totalsByBranch[originId]) {
-      totalsByBranch[originId] = { name: mov.originBranch.name, entry: 0, out: 0, transferIn: 0, transferOut: 0 };
+      totalsByBranch[originId] = { name: originName, entry: 0, out: 0, transferIn: 0, transferOut: 0 };
     }
 
     if (mov.movementType === 'entry') {
@@ -92,12 +94,20 @@ export default function ReportsPage() {
     } else if (mov.movementType === 'transfer') {
       totalsByBranch[originId].transferOut += mov.quantity;
       
-      if (mov.destinationBranch) {
-        const destId = mov.destinationBranch._id;
+      const destId = mov.destinationBranch?._id;
+      const destName = mov.destinationBranch?.name || '[Deleted Branch]';
+      
+      if (destId) {
         if (!totalsByBranch[destId]) {
-          totalsByBranch[destId] = { name: mov.destinationBranch.name, entry: 0, out: 0, transferIn: 0, transferOut: 0 };
+          totalsByBranch[destId] = { name: destName, entry: 0, out: 0, transferIn: 0, transferOut: 0 };
         }
         totalsByBranch[destId].transferIn += mov.quantity;
+      } else {
+        // Handle deleted destination branch
+        if (!totalsByBranch['deleted']) {
+          totalsByBranch['deleted'] = { name: '[Deleted Branch]', entry: 0, out: 0, transferIn: 0, transferOut: 0 };
+        }
+        totalsByBranch['deleted'].transferIn += mov.quantity;
       }
     }
   });

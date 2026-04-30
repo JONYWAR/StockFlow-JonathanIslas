@@ -35,6 +35,11 @@ const MovementSchema = new Schema(
     { timestamps: true }
 );
 
+// Indexes for faster lookups and dependency checks
+MovementSchema.index({ productId: 1 });
+MovementSchema.index({ originBranch: 1 });
+MovementSchema.index({ destinationBranch: 1 });
+
 export const Movement =
     models.Movement || model("Movement", MovementSchema);
 
