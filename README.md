@@ -2,6 +2,8 @@
 
 Una mini-plataforma para manejar inventario de productos distribuidos en varias sucursales, con movimientos entre ellas.
 
+Live preview: https://stock-flow-jonathan-islas.vercel.app
+
 ## 🛠️ Getting Started
 
 ### Installation
