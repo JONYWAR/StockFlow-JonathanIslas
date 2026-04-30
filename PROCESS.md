@@ -13,6 +13,11 @@ El objetivo es construir **StockFlow**: un sistema de control de inventario mult
 
 ---
 
+### **Development Tools**
+- **WebStorm** - IDE for TypeScript, React, and Next.js
+- **PostMan** - API testing and debugging
+- **Figma** - UI design
+
 ## 🎯 Estrategia de Priorización
 
 Aplicando la restricción de **48 horas**, decidí priorizar según el valor funcional y el riesgo:
@@ -25,27 +30,60 @@ Aplicando la restricción de **48 horas**, decidí priorizar según el valor fun
 
 **Decisión:** Comenzar con lo más simple (Producto) para validar la pipeline completa: API → DB → Deployment.
 
-### **Fase 2: Core Entities (En Progreso)**
-- [ ] Modelo **Sucursal** (nombre, ubicación)
-- [ ] Modelo **Stock** (relación Producto ↔ Sucursal)
-- [ ] Modelo **Movimiento** (tipos: entrada, salida, transferencia)
-- [ ] API endpoints para CRUD de sucursales
-- [ ] API endpoints para CRUD de movimientos
+### **Fase 2: Core Entities (Completado)**
+- ✅ Modelo **Sucursal** (nombre, ubicación)
+- ✅ Modelo **Stock** (relación Producto ↔ Sucursal)
+- ✅ Modelo **Movimiento** (tipos: entrada, salida, transferencia)
+- ✅ API endpoints para CRUD de sucursales
+- ✅ API endpoints para CRUD de movimientos
+- ✅ API endpoints para CRUD de Stock
 
 ### **Fase 3: Async Processing (Próximo)**
-- [ ] Sistema de cola para movimientos (estado: `pending` → `processing` → `processed`/`failed`)
-- [ ] Worker que procesa movimientos en background
-- [ ] Actualización de stocks con transacciones
-- [ ] Sistema de reintentos (al menos 1 reintento)
+- ✅ Sistema de cola para movimientos (estado: `pending` →`processed`/`failed`)
+- ✅ Worker que procesa movimientos en background
+- ✅ Actualización de stocks con transacciones
+- ✅ Sistema de reintentos (al menos 1 reintento)
 
 ### **Fase 4: Frontend Dashboard (Final)**
-- [ ] Listado de productos con stock total y por sucursal
-- [ ] Listado de movimientos con filtros (estado, sucursal)
-- [ ] Formularios para crear movimientos
-- [ ] Detalle de movimientos
-- [ ] Reporte por rango de fechas
+- ✅ Listado de productos con stock total y por sucursal
+- ✅ Listado de movimientos con filtros (estado, sucursal)
+- ✅ Formularios para crear movimientos
+- ✅ Detalle de movimientos
+- ✅ Reporte por rango de fechas
 
 ---
+
+
+## Architecture Overview
+
+---
+
+
+```
+┌─────────────────┐
+│   GitHub Repo   │
+└────────┬────────┘
+         │ (push)
+         ▼
+┌─────────────────┐
+│     Vercel      │ ◄─── Auto Deploy
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────┐
+│  StockFlow App (Next.js)        │
+│  ├── Frontend (React)           │
+│  └── Backend (API Routes)       │
+└────────┬────────────────────────┘
+         │ (API calls)
+         ▼
+┌─────────────────────────────────┐
+│  MongoDB Atlas                  │
+│  (Cloud Database - Free Tier)   │
+└─────────────────────────────────┘
+```
+
+
 
 ## 🎓 Decisiones Técnicas Clave
 
@@ -54,7 +92,7 @@ Aplicando la restricción de **48 horas**, decidí priorizar según el valor fun
 **Decisión:** Monorepo con Next.js (frontend + backend integrados)
 
 **Por qué:**
-- ✅ Deploy simplificado en Vercel: un solo proyecto, push → live
+- ✅ Es el stack recomendado, Deploy simplificado en Vercel: un solo proyecto, push → live
 - ✅ Compartir tipos TypeScript entre frontend y API
 - ✅ No requiere configurar CORS externa
 - ✅ Variables de entorno centralizadas
@@ -101,5 +139,3 @@ al intentar leer los Movimientos, ya que hace uso de los IDs los cuales ya no ex
 **Target de entrega:** 2026-04-30 (48 horas)
 
 ---
-
-Última actualización: 2026-04-28

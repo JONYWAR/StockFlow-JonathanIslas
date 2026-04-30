@@ -25,29 +25,16 @@ import styled from '@emotion/styled';
 
 const DRAWER_WIDTH = 250;
 
-const StyledListItem = styled(ListItem)<{ active: boolean }>`
-    &.MuiListItem-root {
-        padding: 10px 16px;
-        margin: 4px 8px;
-        border-radius: 8px;
-        color: ${props => (props.active ? '#FFFFFF' : '#6B7280')};
-        background-color: ${props => (props.active ? '#5B61FF' : 'transparent')};
-        transition: all 0.2s ease;
-
-        &:hover {
-            background-color: ${props => (props.active ? '#4348CC' : '#F3F4F6')};
-            color: ${props => (props.active ? '#FFFFFF' : '#1F2937')};
-        }
-
-        .MuiListItemIcon-root {
-            color: inherit;
-            min-width: 40px;
-        }
-
-        .MuiListItemText-primary {
-            font-weight: ${props => (props.active ? '600' : '500')};
-        }
-    }
+const StyledListItem = styled(ListItem, {
+    shouldForwardProp: (prop) => prop !== "active",
+})<{ active: boolean }>`
+    padding: 10px 16px;
+    margin: 4px 8px;
+    border-radius: 8px;
+    color: ${({active}) => (active ? "#FFFFFF" : "#6B7280")};
+    background-color: ${({active}) =>
+            active ? "#5B61FF" : "transparent"};
+    transition: all 0.2s ease;
 `;
 
 const SidebarHeader = styled(Box)`
@@ -108,7 +95,7 @@ export function Sidebar({open = true, onClose}: SidebarProps) {
                     return (
                         <Link href={item.path} key={item.path} style={{textDecoration: 'none'}}>
                             <StyledListItem 
-                                active={isActive} 
+                                active={isActive}
                                 sx={{cursor: 'pointer'}}
                                 onClick={() => {
                                     if (isMobile && onClose) {

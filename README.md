@@ -10,7 +10,7 @@ npm install
 ```
 
 ### Environment Setup
-Create a `.env.local` file:
+Create a `.env` file:
 ```
 MONGODB_URI=your_mongodb_atlas_connection_string
 ```
@@ -35,7 +35,7 @@ npm run build
 - **Next.js** 16.2.4 - React framework
 - **React** 19.2.4 - UI library
 - **TypeScript** - Type safety
-- **Tailwind CSS** 4 - Styling
+- **Material UI + Styled Components** - Styling
 
 
 ### **Backend**
@@ -61,45 +61,6 @@ npm run build
 - **GitHub** - Version control
 
 
-### **Development Tools**
-- **ESLint** 9 - Code linting
-- **PostCSS** 4 - CSS processing
-
-
-
-
-## 🏗️ Architecture Overview
-
----
-
-
-```
-┌─────────────────┐
-│   GitHub Repo   │
-└────────┬────────┘
-         │ (push)
-         ▼
-┌─────────────────┐
-│     Vercel      │ ◄─── Auto Deploy
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────┐
-│  StockFlow App (Next.js)        │
-│  ├── Frontend (React)           │
-│  └── Backend (API Routes)       │
-└────────┬────────────────────────┘
-         │ (API calls)
-         ▼
-┌─────────────────────────────────┐
-│  MongoDB Atlas                  │
-│  (Cloud Database - Free Tier)   │
-└─────────────────────────────────┘
-```
-
-
-
-## 🚀 Current Features
 
 ---
 
@@ -113,6 +74,40 @@ npm run build
   price: number (required, positive),
   category: string (required),
   createdAt: Date (auto),
+  updatedAt: Date (auto)
+}
+```
+
+### Branch Schema
+```typescript
+{
+  name: string (required, unique),
+  location: string (required),
+  createdAt: Date (auto),
+  updatedAt: Date (auto)
+}
+```
+
+### Movement Schema
+```typescript
+{
+  movementType: "entry" | "out" | "transfer" (required),
+  productId: ObjectId (ref: Product, required),
+  quantity: number (required, min: 1),
+  status: "pending" | "processed" | "failed" (auto),
+  originBranch: ObjectId (ref: Branch, required),
+  destinationBranch: ObjectId (ref: Branch, required if transfer),
+  reason: string (optional),
+  createdAt: Date (auto)
+}
+```
+
+### Stock Schema
+```typescript
+{
+  productId: ObjectId (ref: Product, required),
+  branchId: ObjectId (ref: Branch, required),
+  quantity: number (required, min: 0),
   updatedAt: Date (auto)
 }
 ```
@@ -132,6 +127,38 @@ All data is validated using **Zod** schema validation before being persisted to 
 | **POST** | `/api/products` | Create a new product |
 | **PUT** | `/api/products/[id]` | Update/edit a product |
 | **DELETE** | `/api/products/[id]` | Delete a product |
+
+#### Branches Management
+
+**Base URL:** `/api/branches`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/branches` | Get all branches |
+| **GET** | `/api/branches/[id]` | Get a specific branch |
+| **POST** | `/api/branches` | Create a new branch |
+| **PUT** | `/api/branches/[id]` | Update/edit a branch |
+| **DELETE** | `/api/branches/[id]` | Delete a branch |
+
+#### Movements Management
+
+**Base URL:** `/api/movements`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/movements` | Get all movements |
+| **GET** | `/api/movements/[id]` | Get a specific movement |
+| **POST** | `/api/movements` | Create a new movement |
+| **PUT** | `/api/movements/[id]` | Update a movement |
+| **DELETE** | `/api/movements/[id]` | Delete a movement |
+
+#### Stock Management
+
+**Base URL:** `/api/stocks`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/stocks` | Get current stock levels |
 
 
 ---
@@ -158,9 +185,9 @@ All data is validated using **Zod** schema validation before being persisted to 
 - ✅ CRUD API endpoints implemented
 - ✅ Error handling & validation
 - ✅ Deployed to Vercel with auto-deployment
-- ⏳ Frontend UI (in progress)
-- ⏳ Branch/Sucursal management (planned)
-- ⏳ Inventory movements (planned)
+- ✅ Frontend UI 
+- ✅ Branch/Sucursal management 
+- ✅ Inventory movements 
 
 ---
 
